@@ -1,0 +1,127 @@
+# Please check the documentation https://autoscout24.atlassian.net/wiki/spaces/DATAPLATFORM/pages/104824833/Product+DataRunner+-+Data+Processing #
+domain: my_domain  # Domain name [required]
+team: my_team  # Team name from service catalog [required]
+slack_channel: my-slack-channel  # [use airflow-test-alert for dev if you dont have a channel yet] [required]
+email: my-team@autoscout24.com  # [required]
+pipelines:
+  - name:  # Name of your pipeline [required]
+    description:  # Description of your pipeline [required]
+    business_owner:  # Data Product Owner [required]
+    technical_owner:  # The developer or the team implementing the pipeline [required]
+    sensitivity:  # [options: company_internal|personal|confidential] [if not provided default value is company_internal] [optional, can be commented or removed]
+    sensitivity_usecase:  # [required only in case personal or confidential sensitivity is selected] [optional, can be commented or removed]
+    schedule_interval:  # cron [required] [example: 00 10 * * *]
+    usecase:  # Please provide if you have a running DataWario pipeline [optional, can be commented or removed]
+    sla:  # [hours, integer] [required]
+    tasks:
+      # Python/PySpark task template
+      - name:  # Name of the task [required]
+        description:  # Description of the task [optional, can be commented or removed]
+        file: path_to_my_python/my_python_file.py  # [example: src/project_1/main.py] [required]
+        size:  # [options: extra_small|small|medium|large|extra_large] [required]
+        time_sensitive:  # [options: true|false] [if not provided default value is true] [optional, can be commented or removed]
+        glue_version:  # [if not provided default value is 3.0] [optional, can be commented or removed]
+        args:  # [optional, can be commented or removed] [bellow are just examples]
+          start_date: days_ago(2, '%Y-%m-%d')
+          end_date: days_ago(0, '%Y-%m-%d')
+          bucket: my-bucket-name
+
+      # Scala task template
+      - name:  # Name of the task [required]
+        description:  # Description of the task [optional, can be commented or removed]
+        jar_file: s3://bucket/folder/my-spark-util-SNAPSHOT.jar  # [required]
+        class:  # [example] [required]
+        size:  # [options: small|medium|large|extra_large] [required]
+        time_sensitive:  # [options: true|false] [if not provided default value is true] [optional, can be commented or removed]
+        glue_version:  # [if not provided default value is 3.0] [optional, can be commented or removed]
+        args:  # [optional, can be commented or removed] [bellow are just examples]
+          start_date: days_ago(2, '%Y-%m-%d')
+          end_date: days_ago(0, '%Y-%m-%d')
+          bucket: my-bucket-name
+
+      # Task template to create table from file
+      - name:  # Name of the task [required]
+        description:  # Description of the task [required]
+        util: DataProduct  # [required]
+        actions:  # [required]
+          - name:  # Name of the action [required]
+            util: CreateTable  # [required]
+            module: from_file  # [required]
+            size: small  # [small by default and can't be overwritten for from_file module] [optional, can be commented or removed]
+            args:  # [required]
+              s3_file_path: s3://my_path/  # [required]
+              database: my_database  # [required]
+              table: my_table  # [required]
+              partition_columns: my_column my_datatype  # [optional, can be commented or removed]
+
+          # [optional at the moment, can be commented or removed]
+          - name:  # [required]
+            util: ValidateData  # [required]
+            module: great_expectations  # [required]
+            args:  # [required]
+              file:
+                - src/warning.json  # [file has to be named warning.json] [required]
+
+      # Task template to create table from query
+      - name:  # Name of the task [required]
+        description:  # Description of the task [required]
+        util: DataProduct  # [required]
+        actions:  # [required]
+          - name:  # Name of the action [required]
+            util: CreateTable  # [required]
+            module: from_query  # [required]
+            size: medium  # [if not provided default value is medium] [options: small|medium|large|extra_large] [optional]
+            args:  # [required]
+              s3_file_path: s3://my_path/  # [required]
+              database: my_database  # [required]
+              table: my_table  # [required]
+              partition_columns: my_column my_datatype  # [optional, can be commented or removed]
+              sql_file_path: path_to_my_sql/my_sql_file.sql  # [example: src/project_2/my_sql.sql] [required]
+              overwrite:  # [options: true|false] [if not provided default value is false] [optional, can be commented or removed]
+              extra_args:  # [optional, can be commented or removed]
+                connection:  # [optional]
+                  connector:  # [options: athena|bigquery|mysql ] [required]
+                  connection_name:  # [please contact DPE team] [required]
+                  dataset:  # [only for bigquery] [required]
+                  project:  # [only for bigquery] [required]
+
+          # [optional at the moment, can be commented or removed]
+          - name:  # [required]
+            util: ValidateData  # [required]
+            module: great_expectations  # [required]
+            args:  # [required]
+              file:
+                - src/warning.json  # [file has to be named warning.json] [required]
+
+      # Task template to create view from query
+      - name:  # Name of the task [required]
+        util: DataProduct  # [required]
+        actions:  # [required]
+         - name:  # Name of the action [required]
+           util: CreateView  # [required]
+           module: from_query  # [required]
+           args:  # [required]
+             database: my_database  # [required]
+             view: my_view  # [required]
+             sql_file_path: path_to_my_sql/my_sql_file.sql  # [for example: src/project_2/my_sql.sql] [required]
+             extra_args:  # [optional, can be commented or removed] [bellow are just examples]
+              start_date: days_ago(2, '%Y-%m-%d')
+              end_date: days_ago(0, '%Y-%m-%d')
+              bucket: my-bucket-name
+
+      # Task template to create file from query
+      - name:  # Name of the task [required]
+        description:  # Description of the task [required]
+        util: QueryToFile  # [required]
+        args:  # [required]
+          file_name:  my_file_name  # [required]
+          s3_file_path: s3://my_path/  # [required]
+          sql_file_path: path_to_my_sql/my_sql_file.sql  # [for example: src/project_2/my_sql.sql] [required]
+          file_format: my_file_format  # [if not provided default value is csv] [optional, can be commented or removed] 
+
+    workflow: "task_1_name >> task_2_name >> task_3_name"  # [optional, can be commented or removed, in that case tasks will be scheduled concurrently by default. For more details please check confluence page on row 1]
+    depends_on:  # [optional, can be commented or removed]
+      - dag_id_1
+      - dag_id_2
+
+      # Test

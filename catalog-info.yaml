@@ -1,0 +1,27 @@
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  links:
+    - url: https://github.com/AutoScout24/data-runner-project-template
+      type: documentation
+  name: data-runner-project-template
+  description: |
+    Short project description
+  tags: []
+  availability: false
+  confidentiality: public
+  integrity: false
+  exposure:
+    - non-applicable
+  platform: aws
+  annotations:
+    as24.tech/metadata-revision: 2023-09-01
+spec:
+  owner: group:template-email@autoscout24.com
+  lifecycle: experimental
+  type: service
+  system: data-runner-project-template
+  providesApis: []
+

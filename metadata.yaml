@@ -1,0 +1,20 @@
+# https://docs.services.as24.tech/best-practices/metadata/
+type: application
+name: data-runner-project-template
+id: data-runner-project-template
+product: data-runner-project-template
+vertical: as24
+availability: false
+confidentiality: public
+integrity: false
+exposure:
+  - non-applicable
+lifecycle: preview
+description: |
+  Short project description
+owners:
+  - template-email@autoscout24.com
+links:
+  - type: documentation
+    address: https://github.com/AutoScout24/data-runner-project-template
+platform: aws
